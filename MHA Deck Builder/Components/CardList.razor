@@ -1,0 +1,884 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@using MHA_Deck_Builder.Services
+@using Microsoft.AspNetCore.Hosting;
+@using System.Text.Json;
+@using System.IO;
+@inject JsonFileHasherService CardService
+
+
+<div class="text-center">
+    <h1 class="display-4">Simple MHA CCG Card Search</h1>
+</div>
+
+<div class="container-fluid">
+    <form id="searchForm">
+        <div class="row">
+            <div class="col">
+                <input type="text" class="form-control" placeholder="Card Name" @bind="inputName">
+            </div>
+            <div class="col">
+                <input type="text" class="form-control" placeholder="Card Text" @bind="inputText">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <strong>Card Type</strong>
+                <div class="form-group row">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="characterCheck" id="characterCheck">
+                        <label class="form-check-label" for="characterCheck">Character</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="actionCheck" id="actionCheck">
+                        <label class="form-check-label" for="actionCheck">Action</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="assetCheck" id="assetCheck">
+                        <label class="form-check-label" for="assetCheck">Asset</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="attackCheck" id="attackCheck">
+                        <label class="form-check-label" for="attackCheck">Attack</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="foundationCheck" id="foundationCheck">
+                        <label class="form-check-label" for="foundationCheck">Foundation</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <strong>Card Rarity</strong>
+                <div class="form-group row">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="commonCheck" id="commonCheck">
+                        <label class="form-check-label" for="commonCheck">C</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="uncommonCheck" id="uncommonCheck">
+                        <label class="form-check-label" for="uncommonCheck">UC</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="rareCheck" id="rareCheck">
+                        <label class="form-check-label" for="rareCheck">R</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="ultraCheck" id="ultraCheck">
+                        <label class="form-check-label" for="ultraCheck">UR</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="secretCheck" id="secretCheck">
+                        <label class="form-check-label" for="secretCheck">SR</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="starterCheck" id="starterCheck">
+                        <label class="form-check-label" for="starterCheck">SE</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="promoCheck" id="promoCheck">
+                        <label class="form-check-label" for="promoCheck">P</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" @bind="topperCheck" id="topperCheck">
+                        <label class="form-check-label" for="topperCheck">BT</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <strong>Resource Symbol</strong>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" @bind="matchSymbols" id="match">
+            <label class="form-check-label" for="match">Match all Symbols</label>
+        </div>
+        <div id="Symbols" class="form-group row">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="airCheck" id="air">
+                <label class="form-check-label" for="air"><img src="/Images/air.png">Air</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="allCheck" id="all">
+                <label class="form-check-label" for="all"><img src="/Images/all.png">All</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="chaosCheck" id="chaos">
+                <label class="form-check-label" for="chaos"><img src="/Images/chaos.png">Chaos</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="deathCheck" id="death">
+                <label class="form-check-label" for="death"><img src="/Images/death.png">Death</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="earthCheck" id="earth">
+                <label class="form-check-label" for="earth"><img src="/Images/earth.png">Earth</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="evilCheck" id="evil">
+                <label class="form-check-label" for="evil"><img src="/Images/evil.png">Evil</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="fireCheck" id="fire">
+                <label class="form-check-label" for="fire"><img src="/Images/fire.png">Fire</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="goodCheck" id="good">
+                <label class="form-check-label" for="good"><img src="/Images/good.png">Good</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="lifeCheck" id="life">
+                <label class="form-check-label" for="life"><img src="/Images/life.png">Life</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="orderCheck" id="order">
+                <label class="form-check-label" for="order"><img src="/Images/order.png">Order</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="voidCheck" id="void">
+                <label class="form-check-label" for="void"><img src="/Images/void.png">Void</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="waterCheck" id="water">
+                <label class="form-check-label" for="water"><img src="/Images/water.png">Water</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" @bind="infinityCheck" id="infinity">
+                <label class="form-check-label" for="infinity"><img src="/Images/infinity.png">Infinity</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-2 col-sm-auto">
+                <strong>Difficulty</strong>
+                <div class="form-row align-items-center">
+                    <div class="input-group">
+                        <select class="input-group-prepend" @bind="difficultyOp">
+                            <option>></option>
+                            <option selected>=</option>
+                            <option>&lt</option>
+                        </select>
+                        <input @bind="inputDifficulty" type="number" class="form-control" placeholder="">
+                    </div>
+                </div>
+                <strong>Control</strong>
+                <div class="form-row align-items-center">
+                    <div class="input-group">
+                        <select class="input-group-prepend" @bind="controlOp">
+                            <option>></option>
+                            <option selected>=</option>
+                            <option>&lt</option>
+                        </select>
+                        <input @bind="inputControl" type="number" class="form-control" placeholder="">
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-2 col-sm-auto">
+                <strong>Block Zone</strong>
+                <select @bind="blockZoneCheck" class="form-control">
+                    <option selected>-</option>
+                    <option>High</option>
+                    <option>Mid</option>
+                    <option>Low</option>
+                </select>
+                <strong>Block Mod</strong>
+                <input @bind="inputBlockMod" type="number" class="form-control" placeholder="">
+            </div>
+            <div class="col col-auto align-items-center">
+                <div class="form-row">
+                    <div class="col-auto">
+                        <strong>Keyword Traits</strong>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="allyCheck" id="ally">
+                            <label class="form-check-label" for="ally">
+                                Ally
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="chargeCheck" id="charge">
+                            <label class="form-check-label" for="charge">
+                                Charge
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="furyCheck" id="fury">
+                            <label class="form-check-label" for="fury">
+                                Fury
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="kickCheck" id="kick">
+                            <label class="form-check-label" for="kick">
+                                Kick
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="punchCheck" id="punch">
+                            <label class="form-check-label" for="punch">
+                                Punch
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="rangedCheck" id="ranged">
+                            <label class="form-check-label" for="ranged">
+                                Ranged
+                            </label>
+                        </div>                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="slamCheck" id="slam">
+                            <label class="form-check-label" for="slam">
+                                Slam
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="weaponCheck" id="weapon">
+                            <label class="form-check-label" for="weapon">
+                                Weapon
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <strong>Keyword Abilities</strong>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="breakerCheck" id="breaker">
+                            <label class="form-check-label" for="breaker">
+                                Breaker
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="comboCheck" id="combo">
+                            <label class="form-check-label" for="combo">
+                                Combo
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="EXCheck" id="EX">
+                            <label class="form-check-label" for="EX">
+                                EX
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="flashCheck" id="flash">
+                            <label class="form-check-label" for="flash">
+                                Flash
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="powerfulCheck" id="powerful">
+                            <label class="form-check-label" for="powerful">
+                                Powerful
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="stunCheck" id="stun">
+                            <label class="form-check-label" for="stun">
+                                Stun
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="throwCheck" id="throw">
+                            <label class="form-check-label" for="throw">
+                                Throw
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="uniqueCheck" id="unique">
+                            <label class="form-check-label" for="unique">
+                                Unique
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <input class="form-check-input align-items-center" type="checkbox" @bind="matchKeywords" id="matchK">
+                <label class="form-check-label align-items-center" for="matchK">Match all Keywords</label>
+            </div>
+            <div class="col-lg-2 col-sm-auto">
+                <strong>Zone</strong>
+                <select @bind="inputZone" class="form-control">
+                    <option selected>-</option>
+                    <option>High</option>
+                    <option>Mid</option>
+                    <option>Low</option>
+                </select>
+                <strong>Damage</strong>
+                <div class="form-row">
+                    <div class="input-group">
+                        <select class="input-group-prepend" @bind="damageOp">
+                            <option>></option>
+                            <option selected>=</option>
+                            <option>&lt</option>
+                        </select>
+                        <input @bind="inputDamage" type="number" class="form-control" placeholder="">
+                    </div>
+                </div>
+                <strong>Speed</strong>
+                <div class="form-row">
+                    <div class="input-group">
+                        <select class="input-group-prepend" @bind="speedOp">
+                            <option>></option>
+                            <option selected>=</option>
+                            <option>&lt</option>
+                        </select>
+                        <input @bind="inputSpeed" type="number" class="form-control" placeholder="">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-sm-auto">
+                <strong>Hand Size</strong>
+                <select @bind="handSizeCheck" class="form-control">
+                    <option selected>-</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                </select>
+                <strong>Character Health</strong>
+                <input @bind="healthCheck" type="number" class="form-control" placeholder="">
+            </div>
+        </div>
+    </form>
+</div>
+
+<h1>
+    <input class="form-check-input" type="checkbox" @bind="showSearch" id="show">
+    <label class="form-check-label" for="show">Show Search Results</label>
+</h1>
+
+@if (showSearch == true)
+{
+    <div class="row ">
+        @foreach (var card in this.SearchCards())
+        {
+            <div class="card" style="max-width: 375px">
+                <h5 class="card-title">@card.Name</h5>
+                <img src="/Images/@card.image" class="card-img-bottom" width="375" height="525">
+                <div class="card-footer">
+                    <div class="btn-toolbar justify-content-center" role="toolbar" aria-label="Card Button Toolbar">
+                        <div class="btn-group" role="group" aria-label="Deck Add Numbers">
+                            <button type="button" class="btn btn-primary" @onclick="() => SetCardNumber(card, 0)">0</button>
+                            <button type="button" class="btn btn-primary" @onclick="() => SetCardNumber(card, 1)">1</button>
+                            <button type="button" class="btn btn-primary" @onclick="() => SetCardNumber(card, 2)">2</button>
+                            <button type="button" class="btn btn-primary" @onclick="() => SetCardNumber(card, 3)">3</button>
+                            <button type="button" class="btn btn-primary" @onclick="() => SetCardNumber(card, 4)">4</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="modal" id="deckListModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <strong>Deck List does not save anywhere. Reloading clears list.</strong>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="col">
+                        <div class="form-row">Total @(characterList.Sum(x => x.Value) + actionList.Sum(x => x.Value) + assetList.Sum(x => x.Value) + attackList.Sum(x => x.Value) + foundationList.Sum(x => x.Value))</div>
+                        <div class="form-row"><strong>Characters @characterList.Sum(x => x.Value)</strong></div>
+                        @foreach (KeyValuePair<Card, int> card in characterList)
+                        {
+                            <div class="form-row">
+                                <div class="col">
+                                    <div class="row">
+                                        <button class="btn btn-light btn-sm" @onmouseover="() => deckPreview = card.Key.image" @onclick="() => deckPreview = card.Key.image">@card.Value x @card.Key.Name</button>
+                                    </div>
+                                </div>
+                                <div class="col-3 text-right">
+                                    <div class="btn-group float-right" role="group" aria-label="Deck Add Numbers">
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 0)">0</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 1)">1</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 2)">2</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 3)">3</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 4)">4</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="form-row"><strong>Actions @actionList.Sum(x => x.Value)</strong></div>
+                        @foreach (KeyValuePair<Card, int> card in actionList)
+                        {
+                            <div class="form-row">
+                                <div class="col">
+                                    <div class="row">
+                                        <button class="btn btn-light btn-sm" @onmouseover="() => deckPreview = card.Key.image" @onclick="() => deckPreview = card.Key.image">@card.Value x @card.Key.Name</button>
+                                    </div>
+                                </div>
+                                <div class="col-3 text-right">
+                                    <div class="btn-group float-right" role="group" aria-label="Deck Add Numbers">
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 0)">0</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 1)">1</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 2)">2</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 3)">3</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 4)">4</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="form-row"><strong>Assets @assetList.Sum(x => x.Value)</strong></div>
+                        @foreach (KeyValuePair<Card, int> card in assetList)
+                        {
+                            <div class="form-row">
+                                <div class="col">
+                                    <div class="row">
+                                        <button class="btn btn-light btn-sm" @onmouseover="() => deckPreview = card.Key.image" @onclick="() => deckPreview = card.Key.image">@card.Value x @card.Key.Name</button>
+                                    </div>
+                                </div>
+                                <div class="col-3 text-right">
+                                    <div class="btn-group float-right" role="group" aria-label="Deck Add Numbers">
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 0)">0</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 1)">1</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 2)">2</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 3)">3</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 4)">4</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="form-row"><strong>Attacks @attackList.Sum(x => x.Value)</strong></div>
+                        @foreach (KeyValuePair<Card, int> card in attackList)
+                        {
+                            <div class="form-row">
+                                <div class="col">
+                                    <div class="row">
+                                        <button class="btn btn-light btn-sm" @onmouseover="() => deckPreview = card.Key.image" @onclick="() => deckPreview = card.Key.image">@card.Value x @card.Key.Name</button>
+                                    </div>
+                                </div>
+                                <div class="col-3 text-right">
+                                    <div class="btn-group float-right" role="group" aria-label="Deck Add Numbers">
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 0)">0</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 1)">1</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 2)">2</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 3)">3</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 4)">4</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="form-row"><strong>Foundations @foundationList.Sum(x => x.Value)</strong></div>
+                        @foreach (KeyValuePair<Card, int> card in foundationList)
+                        {
+                            <div class="form-row">
+                                <div class="col">
+                                    <div class="row">
+                                        <button class="btn btn-light btn-sm" @onmouseover="() => deckPreview = card.Key.image" @onclick="() => deckPreview = card.Key.image">@card.Value x @card.Key.Name</button>
+                                    </div>
+                                </div>
+                                <div class="col-3 text-right">
+                                    <div class="btn-group float-right" role="group" aria-label="Deck Add Numbers">
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 0)">0</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 1)">1</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 2)">2</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 3)">3</button>
+                                        <button type="button" class="btn btn-secondary btn-sm" @onclick="() => SetCardNumber(card.Key, 4)">4</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-3">
+                        <img src="/Images/@deckPreview" width="200" height="280">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="fixed-bottom">
+        <button class="btn-primary btn-lg float-right" data-target="#deckListModal" data-toggle="modal">Open Deck List</button>
+    </div>
+
+    @code     {
+
+        List<Card> FilteredList = new List<Card>();
+
+        private string inputName { get; set; }
+        private string inputText { get; set; }
+
+        private bool characterCheck { get; set; }
+        private bool actionCheck { get; set; }
+        private bool assetCheck { get; set; }
+        private bool attackCheck { get; set; }
+        private bool foundationCheck { get; set; }
+
+        private bool matchSymbols { get; set; }
+        private bool airCheck { get; set; }
+        private bool allCheck { get; set; }
+        private bool chaosCheck { get; set; }
+        private bool deathCheck { get; set; }
+        private bool earthCheck { get; set; }
+        private bool evilCheck { get; set; }
+        private bool fireCheck { get; set; }
+        private bool goodCheck { get; set; }
+        private bool lifeCheck { get; set; }
+        private bool orderCheck { get; set; }
+        private bool voidCheck { get; set; }
+        private bool waterCheck { get; set; }
+        private bool infinityCheck { get; set; }
+
+        private string difficultyOp { get; set; } = "=";
+        private string inputDifficulty { get; set; }
+        private string controlOp { get; set; } = "=";
+        private string inputControl { get; set; }
+        private string blockZoneCheck { get; set; } = "-";
+        private string inputBlockMod { get; set; }
+
+        private bool matchKeywords { get; set; }
+        private bool allyCheck { get; set; }
+        private bool chargeCheck { get; set; }
+        private bool kickCheck { get; set; }
+        private bool punchCheck { get; set; }
+        private bool furyCheck { get; set; }
+        private bool weaponCheck { get; set; }
+        private bool rangedCheck { get; set; }
+        private bool slamCheck { get; set; }
+
+        private bool breakerCheck { get; set; }
+        private bool comboCheck { get; set; }
+        private bool EXCheck { get; set; }
+        private bool flashCheck { get; set; }
+        private bool powerfulCheck { get; set; }
+        private bool uniqueCheck { get; set; }
+        private bool stunCheck { get; set; }
+        private bool throwCheck { get; set; }
+
+        private bool commonCheck { get; set; }
+        private bool uncommonCheck { get; set; }
+        private bool rareCheck { get; set; }
+        private bool ultraCheck { get; set; }
+        private bool secretCheck { get; set; }
+        private bool promoCheck { get; set; }
+        private bool topperCheck { get; set; }
+        private bool starterCheck { get; set; }
+
+        private string damageOp { get; set; } = "=";
+        private string inputDamage { get; set; }
+        private string speedOp { get; set; } = "=";
+        private string inputSpeed { get; set; }
+        private string inputZone { get; set; } = "-";
+
+        private string handSizeCheck { get; set; } = "-";
+        private string healthCheck { get; set; }
+
+        private bool showSearch = false;
+
+        private string deckPreview = "UVS Back.png";
+
+        public Dictionary<Card, int> characterList = new Dictionary<Card, int>();
+        public Dictionary<Card, int> actionList = new Dictionary<Card, int>();
+        public Dictionary<Card, int> assetList = new Dictionary<Card, int>();
+        public Dictionary<Card, int> attackList = new Dictionary<Card, int>();
+        public Dictionary<Card, int> foundationList = new Dictionary<Card, int>();
+
+        public void SetCardNumber(Card card, int number)
+        {
+            if (card.Type == "Character")
+            {
+                if (number == 0) { foreach (KeyValuePair<Card, int> oldCard in characterList) { if (card.Id == oldCard.Key.Id) { characterList.Remove(oldCard.Key); } } }
+                else { foreach (KeyValuePair<Card, int> oldCard in characterList) { if (card.Id == oldCard.Key.Id) { characterList.Remove(oldCard.Key); } } characterList.Add(card, number); }
+            }
+            if (card.Type == "Action")
+            {
+                if (number == 0) { foreach (KeyValuePair<Card, int> oldCard in actionList) { if (card.Id == oldCard.Key.Id) { actionList.Remove(oldCard.Key); } } }
+                else { foreach (KeyValuePair<Card, int> oldCard in actionList) { if (card.Id == oldCard.Key.Id) { actionList.Remove(oldCard.Key); } } actionList.Add(card, number); }
+            }
+            if (card.Type == "Asset")
+            {
+                if (number == 0) { foreach (KeyValuePair<Card, int> oldCard in assetList) { if (card.Id == oldCard.Key.Id) { assetList.Remove(oldCard.Key); } } }
+                else { foreach (KeyValuePair<Card, int> oldCard in assetList) { if (card.Id == oldCard.Key.Id) { assetList.Remove(oldCard.Key); } } assetList.Add(card, number); }
+            }
+            if (card.Type == "Attack")
+            {
+                if (number == 0) { foreach (KeyValuePair<Card, int> oldCard in attackList) { if (card.Id == oldCard.Key.Id) { attackList.Remove(oldCard.Key); } } }
+                else { foreach (KeyValuePair<Card, int> oldCard in attackList) { if (card.Id == oldCard.Key.Id) { attackList.Remove(oldCard.Key); } } attackList.Add(card, number); }
+            }
+            if (card.Type == "Foundation")
+            {
+                if (number == 0) { foreach (KeyValuePair<Card, int> oldCard in foundationList) { if (card.Id == oldCard.Key.Id) { foundationList.Remove(oldCard.Key); } } }
+                else { foreach (KeyValuePair<Card, int> oldCard in foundationList) { if (card.Id == oldCard.Key.Id) { foundationList.Remove(oldCard.Key); } } foundationList.Add(card, number); }
+            }
+
+        }
+
+        public bool CheckName(Card card)
+        {
+            if (inputName != null)
+            {
+                string searchName = inputName.ToLower();
+                return card.Name.ToLower().Contains(searchName);
+            }
+            else { return true; }
+        }
+
+        public bool CheckText(Card card)
+        {
+            if (inputText != null)
+            {
+                string searchText = inputText.ToLower();
+                return card.Abilities.ToLower().Contains(searchText);
+            }
+            return true;
+        }
+
+        public bool CheckDifficulty(Card card)
+        {
+            if (inputDifficulty != null && inputDifficulty != "e" && inputDifficulty != "")
+            {
+                int difficulty = Int32.Parse(inputDifficulty);
+                switch (difficultyOp)
+                {
+                    case ">":
+                        return card.Difficulty > difficulty;
+                    case "=":
+                        return card.Difficulty == difficulty;
+                    case "<":
+                        return card.Difficulty < difficulty;
+                }
+            }
+            return true;
+        }
+
+        public bool CheckControl(Card card)
+        {
+            if (inputControl != null && inputControl != "e" && inputControl != "")
+            {
+                int control = Int32.Parse(inputControl);
+                switch (controlOp)
+                {
+                    case ">":
+                        return card.Control > control;
+                    case "=":
+                        return card.Control == control;
+                    case "<":
+                        return card.Control < control;
+                }
+            }
+            return true;
+        }
+
+        public bool CheckBlockZone(Card card)
+        {
+            if (blockZoneCheck == "-")
+            { return true; }
+
+            else
+            {
+                string blockZone = blockZoneCheck;
+                return card.BlockZone.ToString() == blockZone;
+            }
+        }
+
+        public bool CheckBlockMod(Card card)
+        {
+            if (inputBlockMod != null)
+            {
+                string blockMod = inputBlockMod;
+                return card.BlockMod.ToString() == blockMod;
+            }
+            else { return true; }
+        }
+
+        public bool CheckSymbol(Card card)
+        {
+            List<string> symbolCheck = new List<string>();
+
+            if (card.Symbols.Contains("Infinity") == true) return true;
+
+            if (airCheck == true) symbolCheck.Add("Air");
+            if (allCheck == true) symbolCheck.Add("All");
+            if (chaosCheck == true) symbolCheck.Add("Chaos");
+            if (deathCheck == true) symbolCheck.Add("Death");
+            if (earthCheck == true) symbolCheck.Add("Earth");
+            if (evilCheck == true) symbolCheck.Add("Evil");
+            if (fireCheck == true) symbolCheck.Add("Fire");
+            if (goodCheck == true) symbolCheck.Add("Good");
+            if (lifeCheck == true) symbolCheck.Add("Life");
+            if (orderCheck == true) symbolCheck.Add("Order");
+            if (voidCheck == true) symbolCheck.Add("Void");
+            if (waterCheck == true) symbolCheck.Add("Water");
+            if (infinityCheck == true) symbolCheck.Add("Infinity");
+
+            if (symbolCheck.Count() == 0) return true;
+            if (matchSymbols == true) return symbolCheck.All(card.Symbols.Contains);
+            return symbolCheck.Any(card.Symbols.Contains);
+        }
+
+        public bool CheckKeyword(Card card)
+        {
+            List<string> keywordCheck = new List<string>();
+
+            if (allyCheck == true) keywordCheck.Add("Ally");
+            if (chargeCheck == true) keywordCheck.Add("Charge");
+            if (kickCheck == true) keywordCheck.Add("Kick");
+            if (punchCheck == true) keywordCheck.Add("Punch");
+            if (furyCheck == true) keywordCheck.Add("Fury");
+            if (slamCheck == true) keywordCheck.Add("Slam");
+            if (weaponCheck == true) keywordCheck.Add("Weapon");
+            if (rangedCheck == true) keywordCheck.Add("Ranged");
+            if (breakerCheck == true) keywordCheck.Add("Breaker");
+            if (comboCheck == true) keywordCheck.Add("Combo");
+            if (EXCheck == true) keywordCheck.Add("EX");
+            if (flashCheck == true) keywordCheck.Add("Flash");
+            if (powerfulCheck == true) keywordCheck.Add("Powerful");
+            if (uniqueCheck == true) keywordCheck.Add("Unique");
+            if (stunCheck == true) keywordCheck.Add("Stun");
+            if (throwCheck == true) keywordCheck.Add("Throw");
+
+            if (keywordCheck.Count() == 0) return true;
+
+            if (card.Keywords == null) return false;
+
+            if (matchKeywords == true) return keywordCheck.All(card.Keywords.Contains);
+            return keywordCheck.Any(card.Keywords.Contains);
+        }
+
+        public bool CheckType(Card card)
+        {
+            List<string> typeCheck = new List<string>();
+
+            if (characterCheck == true) typeCheck.Add("Character");
+            if (actionCheck == true) typeCheck.Add("Action");
+            if (assetCheck == true) typeCheck.Add("Asset");
+            if (attackCheck == true) typeCheck.Add("Attack");
+            if (foundationCheck == true) typeCheck.Add("Foundation");
+
+            if (typeCheck.Count() == 0) return true;
+
+            return typeCheck.Contains(card.Type);
+        }
+
+        public bool CheckRarity(Card card)
+        {
+            List<string> rarityCheck = new List<string>();
+
+            if (commonCheck == true) rarityCheck.Add("Common");
+            if (uncommonCheck == true) rarityCheck.Add("Uncommon");
+            if (rareCheck == true) rarityCheck.Add("Rare");
+            if (ultraCheck == true) rarityCheck.Add("Ultra");
+            if (secretCheck == true) rarityCheck.Add("Secret");
+            if (starterCheck == true) rarityCheck.Add("Starter");
+            if (promoCheck == true) rarityCheck.Add("Promo");
+            if (topperCheck == true) rarityCheck.Add("Box Topper");
+
+            if (rarityCheck.Count() == 0) return true;
+
+            return rarityCheck.Contains(card.Rarity);
+        }
+
+        public bool CheckDamage(Card card)
+        {
+            if (card.Type != "Attack" && inputDamage != null && inputDamage != "e" && inputDamage != "")
+                return false;
+            if (inputDamage != null && inputDamage != "e" && inputDamage != "")
+            {
+                int damage = Int32.Parse(inputDamage);
+                switch (damageOp)
+                {
+                    case ">":
+                        return card.Damage > damage;
+                    case "=":
+                        return card.Damage == damage;
+                    case "<":
+                        return card.Damage < damage;
+                }
+            }
+            return true;
+        }
+
+        public bool CheckSpeed(Card card)
+        {
+            if (card.Type != "Attack" && inputSpeed != null && inputSpeed != "e" && inputSpeed != "")
+                return false;
+            if (inputSpeed != null && inputSpeed != "e" && inputSpeed != "")
+            {
+                int speed = Int32.Parse(inputSpeed);
+                switch (speedOp)
+                {
+                    case ">":
+                        return card.Speed > speed;
+                    case "=":
+                        return card.Speed == speed;
+                    case "<":
+                        return card.Speed < speed;
+                }
+            }
+            return true;
+        }
+
+        public bool CheckZone(Card card)
+        {
+            if (card.Type != "Attack" && inputZone != "-")
+                return false;
+            if (inputZone == "-")
+            { return true; }
+
+            else
+            {
+                string zone = inputZone;
+                if (card.Zone == null) return false;
+                return card.Zone.ToString() == zone;
+            }
+        }
+
+        public bool CheckHandSize(Card card)
+        {
+            if (handSizeCheck == "-")
+            { return true; }
+
+            else
+            {
+                string handSize = handSizeCheck;
+                return card.HandSize.ToString() == handSize;
+            }
+        }
+
+        public bool CheckHealth(Card card)
+        {
+            if (healthCheck != null)
+            {
+                string health = healthCheck;
+                return card.Health.ToString() == health;
+            }
+            else { return true; }
+        }
+
+        public IEnumerable<Card> SearchCards()
+        {
+            IEnumerable<Card> CardList = new JsonFileHasherService(CardService.WebHostEnvironment).GetCard();
+            FilteredList = new List<Card>();
+
+            List<Func<Card, bool>> filterFuncs = new List<Func<Card, bool>>();
+            filterFuncs.Add(CheckName);
+            filterFuncs.Add(CheckText);
+            filterFuncs.Add(CheckDifficulty);
+            filterFuncs.Add(CheckControl);
+            filterFuncs.Add(CheckBlockZone);
+            filterFuncs.Add(CheckBlockMod);
+            filterFuncs.Add(CheckSymbol);
+            filterFuncs.Add(CheckKeyword);
+            filterFuncs.Add(CheckType);
+            filterFuncs.Add(CheckDamage);
+            filterFuncs.Add(CheckSpeed);
+            filterFuncs.Add(CheckZone);
+            filterFuncs.Add(CheckRarity);
+            filterFuncs.Add(CheckHandSize);
+            filterFuncs.Add(CheckHealth);
+
+            foreach (Card card in CardList)
+            {
+                bool anyTrue = true;
+                foreach (Func<Card, bool> func in filterFuncs)
+                {
+                    anyTrue &= func(card);
+                }
+                if (anyTrue)
+                {
+                    FilteredList.Add(card);
+                }
+            }
+
+            return FilteredList;
+        }
+    }
